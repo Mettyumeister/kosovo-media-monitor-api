@@ -1,0 +1,229 @@
+openapi: 3.1.0
+info:
+  title: Kosovo Media Monitor API
+  description: >
+    Koszovói médiamonitorozó és közösségi médiaelemző asszisztens API-specifikáció. Lehetővé teszi hírek lekérdezését,
+    közösségi médiaelemzést, szentimentelemzést, bottevékenység vizsgálatát, dezinformáció felismerést,
+    narratívák időbeli követését, influenszerek azonosítását, valamint automatikus válaszgenerálást.
+  version: 1.1.0
+servers:
+  - url: https://api.kosovo-media-monitor.ai
+    description: Production server
+paths:
+  /text/disinfo-check:
+    post:
+      operationId: checkDisinformation
+      summary: Dezinformáció felismerés
+      description: Megvizsgálja, hogy a szöveg tartalmaz-e dezinformációra utaló mintákat.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text, language]
+              properties:
+                text:
+                  type: string
+                  example: "A NATO titokban felfegyverzi Koszovót."
+                language:
+                  type: string
+                  example: sr
+      responses:
+        "200":
+          description: Dezinformáció elemzés eredménye.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isDisinfo:
+                    type: boolean
+                  patterns:
+                    type: array
+                    items:
+                      type: string
+                  relatedNarratives:
+                    type: array
+                    items:
+                      type: string
+                  credibilityScore:
+                    type: number
+                    format: float
+
+  /narratives/evolution:
+    get:
+      operationId: getNarrativeEvolution
+      summary: Narratívák időbeli változása
+      description: Követi egy adott kulcsszóhoz kapcsolódó narratíva és szentiment időbeli alakulását.
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Időbeli narratívaelemzés adatai.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  timeline:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        sentiment:
+                          type: string
+                          enum: [positive, neutral, negative]
+                        dominantNarratives:
+                          type: array
+                          items:
+                            type: string
+
+  /stats/summary:
+    get:
+      operationId: getStatsSummary
+      summary: Összesített statisztikák
+      description: Általános statisztikai összefoglalók médiatartalmakról vagy közösségi médiáról.
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [media, social]
+            default: media
+      responses:
+        "200":
+          description: Statisztikai adatok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  postCount:
+                    type: integer
+                  avgEngagement:
+                    type: number
+                    format: float
+                  disinfoRatio:
+                    type: number
+                    format: float
+
+  /socialmedia/top-authors:
+    get:
+      operationId: getTopAuthors
+      summary: Legaktívabb és legbefolyásosabb szerzők
+      description: Visszaadja a legaktívabb közösségi média szerzőket egy adott témában.
+      parameters:
+        - name: topic
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: platform
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [facebook, instagram, x, tiktok, telegram, snapchat]
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Legaktívabb szerzők listája.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                    postCount:
+                      type: integer
+                    avgEngagement:
+                      type: number
+                      format: float
+                    sentimentProfile:
+                      type: string
+                      enum: [positive, neutral, negative]
+
+  /geo/hotspots:
+    get:
+      operationId: getGeoHotspots
+      summary: Térbeli aktivitás
+      description: Visszaadja a közösségi média aktivitás földrajzi megoszlását.
+      responses:
+        "200":
+          description: Lokációs aktivitás adatok.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    location:
+                      type: string
+                    postCount:
+                      type: integer
+                    dominantTopic:
+                      type: string
+
+  /response/generate:
+    post:
+      operationId: generateResponse
+      summary: Automatikus válaszgenerálás
+      description: Adott bejegyzéshez vagy hírhez különböző hangnemben írt válaszjavaslatokat ad.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text, language, tone]
+              properties:
+                text:
+                  type: string
+                language:
+                  type: string
+                  example: en
+                tone:
+                  type: string
+                  enum: [neutral, factual, emotional]
+      responses:
+        "200":
+          description: Válaszjavaslatok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responses:
+                    type: array
+                    items:
+                      type: string
