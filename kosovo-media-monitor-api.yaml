@@ -1,0 +1,83 @@
+{
+  "schema_version": "v1",
+  "name_for_model": "media_monitoring_kosovo_serbia",
+  "name_for_human": "Koszovó–Szerbia Médiafigyelő API",
+  "description_for_model": "Hírelemzés és közösségi média trendek lekérdezése Koszovó és Szerbia viszonylatában, időintervallum alapján.",
+  "description_for_human": "Elemzi a Koszovóval és Szerbiával kapcsolatos híreket és közösségi média trendeket különböző forrásokból.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://example.com/openapi.yaml"
+  },
+  "actions": [
+    {
+      "name": "searchNews",
+      "description": "Visszaadja a megadott időszakra és témára vonatkozó híreket Koszovó és Szerbia kapcsán. Előnyben részesíti a prioritált forrásokat.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "from_date": {
+            "type": "string",
+            "format": "date",
+            "description": "A lekérdezés kezdődátuma (YYYY-MM-DD)."
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date",
+            "description": "A lekérdezés végdátuma (YYYY-MM-DD)."
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keresési kulcsszavak (pl. 'Koszovó', 'Szerbia', 'konfliktus')."
+          },
+          "language": {
+            "type": "string",
+            "enum": ["sq", "sr", "en"],
+            "description": "A hírek nyelve (albán, szerb, angol)."
+          }
+        },
+        "required": ["from_date", "to_date"]
+      }
+    },
+    {
+      "name": "getTrendingSocialMedia",
+      "description": "Visszaadja az adott időszakban népszerű közösségi médiás tartalmakat, posztokat, reakciókat és kommenteket érzelmi elemzéssel.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "from_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Kezdődátum (YYYY-MM-DD)"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Végdátum (YYYY-MM-DD)"
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["facebook", "instagram", "x", "tiktok"]
+            },
+            "description": "Elemzendő közösségi platformok listája"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Kulcsszavak vagy hashtagek, amikre figyelni kell."
+          }
+        },
+        "required": ["from_date", "to_date", "platforms"]
+      }
+    }
+  ]
+}
