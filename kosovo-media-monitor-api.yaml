@@ -1,0 +1,257 @@
+openapi: 3.1.0
+info:
+  title: Kosovo-Serbia Advanced Media Analysis API
+  description: >-
+    Fejlett médiamonitorozó és közösségi médiaelemző API, amely Koszovó és
+    Szerbia tekintetében nyújt részletes, strukturált elemzést valós időben, integrált botdetektálással
+    és hitelességi ellenőrzéssel.
+  version: 2.0.0
+servers:
+  - url: https://api.kosovo-media-monitor.ai/v2
+    description: Production server
+
+paths:
+  /news/search:
+    get:
+      summary: Hírek részletes keresése
+      operationId: searchNews
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: keywords
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sources
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Részletes hírek strukturált listája
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    url:
+                      type: string
+                    publishedAt:
+                      type: string
+                      format: date
+                    summary:
+                      type: string
+                    source:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        orientation:
+                          type: string
+                          enum:
+                            - neutral
+                            - pro-government
+                            - opposition
+                            - international
+                            - regional
+                            - serbian-state
+                    eventTags:
+                      type: array
+                      items:
+                        type: string
+                    keywords:
+                      type: array
+                      items:
+                        type: string
+                    credibilityScore:
+                      type: number
+
+  /socialmedia/trending:
+    get:
+      summary: Közösségi média trendek elemzése
+      operationId: getTrendingSocialMedia
+      parameters:
+        - name: platform
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - facebook
+              - instagram
+              - x
+              - tiktok
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Strukturált közösségi média trendek
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    platform:
+                      type: string
+                    postUrl:
+                      type: string
+                    content:
+                      type: string
+                    engagement:
+                      type: object
+                      properties:
+                        likes:
+                          type: integer
+                        shares:
+                          type: integer
+                        comments:
+                          type: integer
+                    topComments:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          comment:
+                            type: string
+                          sentiment:
+                            type: string
+                            enum:
+                              - positive
+                              - negative
+                              - neutral
+                    dominantNarratives:
+                      type: array
+                      items:
+                        type: string
+                    authorType:
+                      type: string
+                      enum:
+                        - individual
+                        - influencer
+                        - media
+                        - organization
+                        - bot
+                    botActivityDetected:
+                      type: boolean
+
+  /news/fallback:
+    get:
+      summary: Alternatív gyors hírek lekérése
+      operationId: fallbackNewsSearch
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Egyszerűsített hírek
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    url:
+                      type: string
+                    publishedAt:
+                      type: string
+                      format: date
+                    source:
+                      type: string
+
+  /geo/detailed-hotspots:
+    get:
+      summary: Részletes regionális aktivitáselemzés
+      operationId: getDetailedGeoHotspots
+      parameters:
+        - name: region
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - kosovo
+              - serbia
+      responses:
+        "200":
+          description: Részletes regionális eseményadatok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    location:
+                      type: string
+                    coordinates:
+                      type: object
+                      properties:
+                        lat:
+                          type: number
+                        lon:
+                          type: number
+                    postCount:
+                      type: integer
+                    dominantTopics:
+                      type: array
+                      items:
+                        type: string
+                    sentimentDistribution:
+                      type: object
+                      properties:
+                        positive:
+                          type: integer
+                        negative:
+                          type: integer
+                        neutral:
+                          type: integer
+
+security:
+  - apiKeyAuth: []
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
