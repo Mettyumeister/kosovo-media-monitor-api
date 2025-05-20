@@ -1,0 +1,171 @@
+openapi: 3.1.0
+info:
+  title: Kosovo-Serbia Media Intelligence API
+  version: "1.0.0"
+  description: >
+    Fejlett médiamonitorozás és közösségi diskurzus-elemzés Koszovó és Szerbia témakörében, strukturált,
+    többforrású adatgyűjtéssel, narratívaértelmezéssel és társadalmi hatáselemzéssel.
+
+servers:
+  - url: https://e654-193-176-126-42.ngrok-free.app  
+
+paths:
+  /searchNews:
+    post:
+      summary: Többforrású hírelemzés Koszovó és Szerbia témakörében
+      operationId: searchNews
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsSearchRequest"
+      responses:
+        "200":
+          description: Strukturált hírcikkek
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsSearchResponse"
+
+  /getTrendingSocialMedia:
+    post:
+      summary: Közösségi médiás narratíva- és érzelemvizsgálat
+      operationId: getTrendingSocialMedia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SocialRequest"
+      responses:
+        "200":
+          description: Értelmezett közösségi tartalom elemzés
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SocialResponse"
+
+components:
+  schemas:
+
+    NewsSearchRequest:
+      type: object
+      required: [from_date, to_date]
+      properties:
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        keywords:
+          type: array
+          items: { type: string }
+        language:
+          type: string
+          enum: [en, sq, sr]
+        prioritize_sources:
+          type: boolean
+          default: true
+          description: "Prioritált koszovói, szerbiai és nemzetközi források használata elsődlegesen"
+
+    NewsSearchResponse:
+      type: object
+      properties:
+        articles:
+          type: array
+          items:
+            type: object
+            properties:
+              title: { type: string }
+              date: { type: string }
+              summary: { type: string }
+              source:
+                type: object
+                properties:
+                  name: { type: string }
+                  url: { type: string }
+                  bias:
+                    type: string
+                    enum:
+                      - semleges
+                      - kormányközeli
+                      - ellenzéki
+                      - nemzetközi
+                      - regionális
+                      - szerbiai állami
+              tags:
+                type: array
+                items: { type: string }
+                description: "Eseménycímkék pl. Belpolitika, Etnikai konfliktus, EU-integráció"
+              keywords:
+                type: array
+                items: { type: string }
+              location:
+                type: string
+                description: "Földrajzi fókusz: város, régió"
+              credibility_check:
+                type: string
+                description: "Hitelességi keresztellenőrzés eredménye"
+
+    SocialRequest:
+      type: object
+      required: [from_date, to_date, platforms, keywords]
+      properties:
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        platforms:
+          type: array
+          items:
+            type: string
+            enum: [facebook, instagram, x, tiktok]
+        keywords:
+          type: array
+          items: { type: string }
+
+    SocialResponse:
+      type: object
+      properties:
+        platforms:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              top_posts:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    content: { type: string }
+                    reach: { type: integer }
+                    reactions:
+                      type: object
+                      additionalProperties: { type: integer }
+                    author_type:
+                      type: string
+                      enum: [hivatalos, civil, híroldal, magánszemély]
+              tone_analysis:
+                type: object
+                properties:
+                  positive_examples:
+                    type: array
+                    items: { type: string }
+                  negative_examples:
+                    type: array
+                    items: { type: string }
+                  neutral_examples:
+                    type: array
+                    items: { type: string }
+              narratives:
+                type: array
+                items: { type: string }
+              manipulation_signs:
+                type: array
+                items: { type: string }
+                description: "Pl. botminta, szinkronizált kampányok, ismétlődő szóhasználat"
